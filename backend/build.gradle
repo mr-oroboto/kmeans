@@ -1,0 +1,28 @@
+apply plugin: 'java'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	compile (
+		'com.amazonaws:aws-lambda-java-core:1.1.0',
+		'com.amazonaws:aws-lambda-java-events:1.1.0',
+		'com.amazonaws:aws-java-sdk-dynamodb:1.10.52',
+		'commons-io:commons-io:2.4',
+		'com.google.code.gson:gson:2.3.1',
+	)
+	testCompile (
+		'junit:junit:4.11'
+	)
+}
+
+task buildZip(type: Zip) {
+	from compileJava
+	from processResources
+	into('lib') {
+		from configurations.runtime
+	}
+}
+
+build.dependsOn buildZip

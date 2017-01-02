@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE-edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>k-means</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/base.css">
+    <!--[if lt IE 9]>
+    <!--<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>-->
+    <!--<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>-->
+    <![endif]-->
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+</head>
+<body ng-app="kmeans" ng-controller="AppCtrl" ng-cloak>
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="/">Home</a></li>
+                </ul>
+            </div><!--/.nav-collapse -->
+        </div>
+    </nav>
+
+    <div class="container-fluid" ng-controller="TrainingSetsCtrl as trainingSets">
+        <div class="row main">
+            <div class="col-sm-9 col-sm-offset-1 col-md-10 col-md-offset-1" ng-show="trainingSets.loading">
+                <img src="load.svg" /> Loading training sets, please wait ...
+            </div>
+            <div class="col-sm-9 col-sm-offset-1 col-md-10 col-md-offset-1" ng-show=" ! trainingSets.loading">
+                <form>
+                    <div class="form-group row">
+                        <label for="trainingSet" class="col-sm-2 col-form-label">Training Set</label>
+                        <div class="col-sm-8">
+                            <select class="form-control" id="trainingSet" ng-model="trainingSets.selectedSet" ng-options="set.id as set.name for set in trainingSets.trainingSets"></select>
+                        </div>
+                        <div class="col-sm-2">
+                            <button type="button" class="btn btn-default" ng-click="trainingSets.createNewTrainingSet()">Add New</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div ng-controller="DataSetCtrl as dataset" ng-show="trainingSets.selectedSet && ! trainingSets.loading">
+            <div class="row main">
+                <div class="col-sm-9 col-sm-offset-1 col-md-10 col-md-offset-1">
+                    <canvas id="chart-dataset" class="chart-bubble" chart-data="dataset.data" chart-series="dataset.series"></canvas>
+                </div>
+            </div>
+            <div class="row main">
+                <div class="col-md-10 col-md-offset-1">
+                    <span ng-show=" ! dataset.loading">Looked for {{ dataset.clusterCount }} clusters, found {{ dataset.clusterCountFound }} cluster(s). Try again with <input type="text" ng-model="dataset.clusterCount" /> clusters.</span>
+                    <span ng-show="dataset.loading"><img src="load.svg" /> Finding clusters for dataset {{ trainingSets.selectedSet }} ...</span>
+                </div>
+            </div>
+            <div class="row main" ng-show=" ! dataset.loading">
+                <div class="col-md-10 col-md-offset-1">
+                    <kmeans-add-samples set-id="dataset.setId"></kmeans-add-samples>
+                </div>
+            </div>
+        </div>
+        <div ng-show="trainingSets.selectedSet == null && ! trainingSets.loading">
+            <div class="row main">
+                <div class="col-md-10 col-md-offset-1">
+                    <kmeans-add-samples set-id="" creating-new-set="true"></kmeans-add-samples>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular-resource.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular-animate.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular-messages.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.6/Chart.min.js" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/angular.chartjs/1.0.2/angular-chart.min.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.2.0/ui-bootstrap.min.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.2.0/ui-bootstrap-tpls.min.js" type="text/javascript"></script>
+    <script src="js/app.js"></script>
+    <script src="js/package/common/_core.js"></script>
+    <script src="js/package/common/service.configbucket.js"></script>
+    <script src="js/package/dataset/_core.js"></script>
+    <script src="js/package/dataset/service.dataset.js"></script>
+    <script src="js/package/dataset/controller.dataset.js"></script>
+    <script src="js/package/dataset/directive.addsamples.js"></script>
+    <script src="js/package/trainingsets/_core.js"></script>
+    <script src="js/package/trainingsets/service.trainingsets.js"></script>
+    <script src="js/package/trainingsets/controller.trainingsets.js"></script>
+</body>
+</html>
